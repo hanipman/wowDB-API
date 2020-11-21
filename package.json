@@ -1,0 +1,31 @@
+{
+  "name": "wowDB-API",
+  "version": "1.0.0",
+  "description": "Web API for wowDB",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "mocha --exit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hanipman/wowDB-API.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hanipman/wowDB-API/issues"
+  },
+  "homepage": "https://github.com/hanipman/wowDB-API#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "pg": "^8.5.1"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "mocha": "^8.2.1"
+  }
+}
