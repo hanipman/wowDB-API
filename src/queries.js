@@ -35,7 +35,7 @@ const getItemName = (request, response) => {
 }
 
 const getItemPic = (request, response) => {
-    if (isNaN(item_id)) {
+    if (isNaN(request.params.id)) {
         response.status(400).send({error: {
             status: 400,
             message: "Bad Request",
@@ -58,7 +58,7 @@ const getItemPic = (request, response) => {
 }
 
 const getItemList = (request, response) => {
-    pool.query('SELECT * FROM item_list ORDER BY item_id', (error, results) => {
+    pool.query('SELECT item_id, item_name FROM item_list ORDER BY item_id', (error, results) => {
         if (error) {
             throw error
         }
@@ -81,7 +81,7 @@ const getItemHistory = (request, response) => {
         }})
         return
     }
-    pool.query('SELECT * FROM $1 WHERE item_id = $2', [request.params.realm, request.params.id], (error, results) => {
+    pool.query('SELECT * FROM ' + request.params.realm + ' WHERE item_id = $1 ORDER BY interval', [request.params.id], (error, results) => {
         if (error) {
             throw error
         }
