@@ -7,7 +7,9 @@ const should = chai.should()
 
 chai.use(chaiHttp)
 
-const test_pic = [255,216,255,224,0,16,74,70,73,70,0,1,2,0,0,1,0,1,0,0,255,219,0,
+// TODO: Figure out how to parse from test_image.csv instead of this monster
+const test_pic = Buffer.from(
+    [255,216,255,224,0,16,74,70,73,70,0,1,2,0,0,1,0,1,0,0,255,219,0,
     67,0,3,2,2,3,2,2,3,3,3,3,4,3,3,4,5,8,5,5,4,4,5,10,7,7,6,8,12,10,12,12,11,10,
     11,11,13,14,18,16,13,14,17,14,11,11,16,22,16,17,19,20,21,21,21,12,15,23,24,
     22,20,24,18,20,21,20,255,219,0,67,1,3,4,4,5,4,5,9,5,5,9,20,13,11,13,20,20,
@@ -105,7 +107,7 @@ const test_pic = [255,216,255,224,0,16,74,70,73,70,0,1,2,0,0,1,0,1,0,0,255,219,0
     186,183,67,130,90,32,67,12,98,138,43,143,217,69,222,253,217,216,234,75,75,
     118,71,143,234,215,58,151,140,124,72,210,189,177,251,109,209,68,72,17,118,
     133,85,80,170,6,122,40,85,3,39,128,5,20,81,93,169,36,172,142,77,245,103,255,
-    217]
+    217])
 
 describe('/GET item name', () => {
     it('it should GET an item name with item ID 38', (done) => {
@@ -156,8 +158,8 @@ describe('/GET item image', () => {
                 res.body.length.should.be.eql(1)
                 res.body[0].should.have.property('item_pic')
                 res.body[0]['item_pic'].should.include.all.keys(['type', 'data'])
-                res.body[0]['item_pic']['type'].should.be.eql('Buffer')
-                res.body[0]['item_pic']['data'].should.be.eql(test_pic)
+                res.body[0]['item_pic']['type'].should.be.equal('Buffer')
+                assert(!Buffer.compare(Buffer.from(res.body[0]['item_pic']), test_pic))
             done()
         })
     })

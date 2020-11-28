@@ -7,10 +7,6 @@ const pool = new Pool({
     port: 5432,
 })
 
-// function error(err, req, res, next) {
-    
-// }
-
 const getItemName = (request, response) => {
     if (isNaN(request.params.id)) {
         response.status(400).send({error: {
