@@ -7,6 +7,13 @@ const pool = new Pool({
     port: 5432,
 })
 
+/**
+ * This function describes the route to get an item name based on an item id.
+ * @param {number} request ID of item
+ * @param {json} response JSON containing item name corresponding to item ID
+ * @throws will throw an error if request parameter invalid or response empty. 
+ */
+
 const getItemName = (request, response) => {
     if (isNaN(request.params.id)) {
         response.status(400).send({error: {
@@ -30,6 +37,12 @@ const getItemName = (request, response) => {
     })
 }
 
+/** 
+ * This function describes the route to get an item thumbnail based on an item ID.
+ * @param {number} request ID of item
+ * @param {json} response JSON containing item picture as a byte array
+ * @throws will throw an error if request parameter invalid or response empty. 
+ */
 const getItemPic = (request, response) => {
     if (isNaN(request.params.id)) {
         response.status(400).send({error: {
@@ -53,6 +66,12 @@ const getItemPic = (request, response) => {
     })
 }
 
+/**
+ * This function describes the route to get the list of items currently tracked.
+ * @param {NULL} request Request has no parameters
+ * @param {list} response List of item ids and corresponding names
+ * @throws will throw an error if response empty. 
+ */
 const getItemList = (request, response) => {
     pool.query('SELECT item_id, item_name FROM item_list ORDER BY item_id', (error, results) => {
         if (error) {
@@ -69,6 +88,12 @@ const getItemList = (request, response) => {
     })
 }
 
+/**
+ * This function gets the price history of a single item
+ * @param {integer} request ID of item
+ * @param {list} response List of statistical data based on item prices
+ * @throws will throw an error if request parameter invalid or response empty. 
+ */
 const getItemHistory = (request, response) => {
     if (isNaN(request.params.id)) {
         response.status(400).send({error: {

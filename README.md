@@ -10,6 +10,7 @@ Route | Description
 
 ## Dependencies
 ```
+cors
 dotenv
 express
 pg
@@ -21,3 +22,10 @@ chai
 chai-http
 mocha
 ```
+
+## Scripts
+Script | Description
+-------|------------
+npm start | Start server (default port: 3000)
+npm test | Run testing suite
+npm run doc | Creates documentation using JSDoc in docs folder
