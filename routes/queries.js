@@ -13,7 +13,6 @@ const pool = new Pool({
  * @param {json} response JSON containing item name corresponding to item ID
  * @throws will throw an error if request parameter invalid or response empty. 
  */
-
 const getItemName = (request, response) => {
     if (isNaN(request.params.id)) {
         response.status(400).send({error: {
@@ -37,7 +36,7 @@ const getItemName = (request, response) => {
     })
 }
 
-/** 
+/**
  * This function describes the route to get an item thumbnail based on an item ID.
  * @param {number} request ID of item
  * @param {json} response JSON containing item picture as a byte array
@@ -73,7 +72,12 @@ const getItemPic = (request, response) => {
  * @throws will throw an error if response empty. 
  */
 const getItemList = (request, response) => {
-    pool.query('SELECT item_id, item_name FROM item_list ORDER BY item_id', (error, results) => {
+    let stmt = 'SELECT item_id, item_name FROM item_list'
+    if (request.query.q) {
+        stmt += " WHERE item_name ILIKE '%" + request.query.q + "%'"
+    }
+    stmt += ' ORDER BY item_id'
+    pool.query(stmt, (error, results) => {
         if (error) {
             throw error
         }
