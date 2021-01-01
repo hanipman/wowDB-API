@@ -4,7 +4,7 @@
   "description": "Web API for wowDB",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "nodemon server.js",
     "test": "mocha test --exit --timeout 5000",
     "doc": "jsdoc ./routes/queries.js -d docs"
   },
