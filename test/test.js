@@ -1,5 +1,5 @@
 
-const { assert } = require('chai')
+const { assert, expect } = require('chai')
 const chai = require('chai')
 const chaiHttp = require('chai-http')
 const server = require('../server')
@@ -198,6 +198,22 @@ describe('/GET item list', () => {
                 res.body.should.be.a('array')
                 res.body[0].should.include.all.keys(['item_id', 'item_name'])
                 res.body[0]['item_id'].should.be.below(res.body[1]['item_id'])
+            done()
+            })
+    })
+})
+
+describe('/GET search item list', () => {
+    it('it should return a list of items matching a string', (done) => {
+        chai.request(server)
+            .get('/item_list/?q=thunder')
+            .end((err, res) => {
+                res.should.have.status(200)
+                res.body.should.be.a('array')
+                res.body[0].should.include.all.keys(['item_id', 'item_name'])
+                res.body.forEach(value => {
+                    expect(value['item_name'].includes('thunder'))
+                })
             done()
             })
     })
