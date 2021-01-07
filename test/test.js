@@ -115,10 +115,22 @@ describe('/GET item name', () => {
             .get('/item_list/name/38')
             .end((err, res) => {
                 res.should.have.status(200)
-                res.body.should.be.a('array')
-                res.body.length.should.be.eql(1)
-                res.body[0].should.include.all.keys(['item_name'])
-                res.body[0]['item_name'].should.be.eql("Recruit's Shirt")
+                res.body.should.include.all.keys(['results'])
+                res.body['results'].length.should.be.eql(1)
+                res.body['results'].should.be.a('array')
+                res.body['results'][0].should.have.property('item_name')
+                res.body['results'][0]['item_name'].should.be.eql("Recruit's Shirt")
+            done()
+        })
+    })
+    it('it should GET an empty array', (done) => {
+        chai.request(server)
+            .get('/item_list/name/154')
+            .end((err, res) => {
+                res.should.have.status(200)
+                res.body.should.include.all.keys(['results'])
+                res.body['results'].length.should.be.eql(0)
+                res.body['results'].should.be.a('array')
             done()
         })
     })
@@ -134,18 +146,6 @@ describe('/GET item name', () => {
             done()
             })
     })
-    it('it should return a 404 error with an item ID not found in database', (done) => {
-        chai.request(server)
-            .get('/item_list/name/154')
-            .end((err, res) => {
-                res.should.have.status(404)
-                res.body.should.have.property('error')
-                res.body['error'].should.include.all.keys(['status', 'message'])
-                res.body['error']['status'].should.be.eql(404)
-                res.body['error']['message'].should.be.eql("Not Found")
-            done()
-            })
-    })
 })
 
 describe('/GET item image', () => {
@@ -154,12 +154,24 @@ describe('/GET item image', () => {
             .get('/item_list/image/38')
             .end((err, res) => {
                 res.should.have.status(200)
-                res.body.should.be.a('array')
-                res.body.length.should.be.eql(1)
-                res.body[0].should.have.property('item_pic')
-                res.body[0]['item_pic'].should.include.all.keys(['type', 'data'])
-                res.body[0]['item_pic']['type'].should.be.equal('Buffer')
-                assert(!Buffer.compare(Buffer.from(res.body[0]['item_pic']), test_pic))
+                res.body.should.include.all.keys(['results'])
+                res.body['results'].length.should.be.eql(1)
+                res.body['results'].should.be.a('array')
+                res.body['results'][0].should.have.property('item_pic')
+                res.body['results'][0]['item_pic'].should.include.all.keys(['type', 'data'])
+                res.body['results'][0]['item_pic']['type'].should.be.equal('Buffer')
+                assert(!Buffer.compare(Buffer.from(res.body['results'][0]['item_pic']), test_pic))
+            done()
+        })
+    })
+    it('it should GET an empty array', (done) => {
+        chai.request(server)
+            .get('/item_list/image/154')
+            .end((err, res) => {
+                res.should.have.status(200)
+                res.body.should.include.all.keys(['results'])
+                res.body['results'].length.should.be.eql(0)
+                res.body['results'].should.be.a('array')
             done()
         })
     })
@@ -175,18 +187,6 @@ describe('/GET item image', () => {
             done()
             })
     })
-    it('it should return a 404 error with an item ID not found in database', (done) => {
-        chai.request(server)
-            .get('/item_list/image/154')
-            .end((err, res) => {
-                res.should.have.status(404)
-                res.body.should.have.property('error')
-                res.body['error'].should.include.all.keys(['status', 'message'])
-                res.body['error']['status'].should.be.eql(404)
-                res.body['error']['message'].should.be.eql("Not Found")
-            done()
-            })
-    })
 })
 
 describe('/GET item list', () => {
@@ -195,9 +195,11 @@ describe('/GET item list', () => {
             .get('/item_list')
             .end((err, res) => {
                 res.should.have.status(200)
-                res.body.should.be.a('array')
-                res.body[0].should.include.all.keys(['item_id', 'item_name'])
-                res.body[0]['item_id'].should.be.below(res.body[1]['item_id'])
+                res.body.should.include.all.keys(['results'])
+                res.body['results'].length.should.be.above(0)
+                res.body['results'].should.be.a('array')
+                res.body['results'][0].should.include.all.keys(['item_id', 'item_name'])
+                res.body['results'][0]['item_id'].should.be.below(res.body['results'][1]['item_id'])
             done()
             })
     })
@@ -209,9 +211,11 @@ describe('/GET search item list', () => {
             .get('/item_list/?q=thunder')
             .end((err, res) => {
                 res.should.have.status(200)
-                res.body.should.be.a('array')
-                res.body[0].should.include.all.keys(['item_id', 'item_name'])
-                res.body.forEach(value => {
+                res.body.should.include.all.keys(['results'])
+                res.body['results'].length.should.above(0)
+                res.body['results'].should.be.a('array')
+                res.body['results'][0].should.include.all.keys(['item_id', 'item_name'])
+                res.body['results'].forEach(value => {
                     expect(value['item_name'].includes('thunder'))
                 })
             done()
@@ -225,12 +229,15 @@ describe('/GET item history', () => {
             .get('/wowdb/area_52/38')
             .end((err, res) => {
                 res.should.have.status(200)
-                res.body.should.be.a('array')
-                res.body[0].should.include.all.keys(['interval', 'item_id',
+                res.body.should.include.all.keys(['results'])
+                res.body['results'].length.should.be.above(0)
+                res.body['results'].should.be.a('array')
+                res.body['results'][0].should.include.all.keys(['interval', 'item_id',
                     'quantity', 'avg_unit_price', 'std_dev', 'high_price', 
                     'low_price'])
-                res.body[0]['item_id'].should.be.eql(38)
-                assert(new Date(res.body[0]['interval']) < new Date(res.body[1]['interval']), '')
+                res.body['results'].forEach(value => {
+                    expect(new Date(value['interval']) < new Date(value['interval']))
+                })
             done()
             })
     })
@@ -243,18 +250,6 @@ describe('/GET item history', () => {
                 res.body['error'].should.include.all.keys(['status', 'message'])
                 res.body['error']['status'].should.be.eql(400)
                 res.body['error']['message'].should.be.eql("Bad Request")
-            done()
-            })
-    })
-    it('it should return a 404 error with an item ID not found in database', (done) => {
-        chai.request(server)
-            .get('/wowdb/area_52/154')
-            .end((err, res) => {
-                res.should.have.status(404)
-                res.body.should.have.property('error')
-                res.body['error'].should.include.all.keys(['status', 'message'])
-                res.body['error']['status'].should.be.eql(404)
-                res.body['error']['message'].should.be.eql("Not Found")
             done()
             })
     })

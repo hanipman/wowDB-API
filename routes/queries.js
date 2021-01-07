@@ -1,3 +1,5 @@
+const createError = require('http-errors')
+// const { promisify } = require('util')
 const Pool = require('pg').Pool
 const pool = new Pool({
     user: 'postgres',
@@ -15,25 +17,19 @@ const pool = new Pool({
  */
 const getItemName = (request, response) => {
     if (isNaN(request.params.id)) {
-        response.status(400).send({error: {
-            status: 400,
-            message: "Bad Request",
-        }})
-        return
+        throw createError(400, 'Bad Request')
     }
-    pool.query('SELECT item_name FROM item_list WHERE item_id = $1', [request.params.id], (error, results) => {
-        if (error) {
-            throw error
-        }
-        if (!results.rows.length) {
-            response.status(404).send({error: {
-                status: 404,
-                message: 'Not Found',
-            }})
-            return
-        }
-        response.status(200).json(results.rows)
-    })
+    pool.query('SELECT item_name FROM item_list WHERE item_id = $1', [request.params.id])
+        .then(results => {
+            if (!results.rows.length) {
+                response.status(200).json({
+                    results: []
+                })
+                return
+            }
+            response.status(200).json({ results: results.rows})
+        })
+        .catch(error => { throw error })
 }
 
 /**
@@ -44,52 +40,44 @@ const getItemName = (request, response) => {
  */
 const getItemPic = (request, response) => {
     if (isNaN(request.params.id)) {
-        response.status(400).send({error: {
-            status: 400,
-            message: "Bad Request",
-        }})
-        return
+        throw createError(400, 'Bad Request')
     }
-    pool.query('SELECT item_pic FROM item_list WHERE item_id = $1', [request.params.id], (error, results) => {
-        if (error) {
-            throw error
-        }
-        if (!results.rows.length) {
-            response.status(404).send({error: {
-                status: 404,
-                message: 'Not Found',
-            }})
-            return
-        }
-        response.status(200).json(results.rows)
-    })
+    pool.query('SELECT item_pic FROM item_list WHERE item_id = $1', [request.params.id])
+        .then(results => {
+            if (!results.rows.length) {
+                response.status(200).json({
+                    results: []
+                })
+                return
+            }
+            response.status(200).json({ results: results.rows})
+        })
+        .catch(error => { throw error })
 }
 
 /**
  * This function describes the route to get the list of items currently tracked.
- * @param {NULL} request Request has no parameters
+ * @param {NULL} request.query.search Substring to match
  * @param {list} response List of item ids and corresponding names
  * @throws will throw an error if response empty. 
  */
 const getItemList = (request, response) => {
     let stmt = 'SELECT item_id, item_name FROM item_list'
-    if (request.query.q) {
-        stmt += " WHERE item_name ILIKE '%" + request.query.q + "%'"
+    if (request.query.search) {
+        stmt += " WHERE item_name ILIKE '%" + request.query.search + "%'"
     }
     stmt += ' ORDER BY item_id'
-    pool.query(stmt, (error, results) => {
-        if (error) {
-            throw error
-        }
-        if (!results.rows.length) {
-            response.status(404).send({error: {
-                status: 404,
-                message: 'Not Found',
-            }})
-            return
-        }
-        response.status(200).json(results.rows)
-    })
+    pool.query(stmt)
+        .then(results => {
+            if (!results.rows.length) {
+                response.status(200).json({
+                    results: []
+                })
+                return
+            }
+            response.status(200).json({ results: results.rows})
+        })
+        .catch(error => { throw error })
 }
 
 /**
@@ -100,25 +88,19 @@ const getItemList = (request, response) => {
  */
 const getItemHistory = (request, response) => {
     if (isNaN(request.params.id)) {
-        response.status(400).send({error: {
-            status: 400,
-            message: "Bad Request",
-        }})
-        return
+        throw createError(400, 'Bad Request')
     }
-    pool.query('SELECT * FROM ' + request.params.realm + ' WHERE item_id = $1 ORDER BY interval', [request.params.id], (error, results) => {
-        if (error) {
-            throw error
-        }
-        if (!results.rows.length) {
-            response.status(404).send({error: {
-                status: 404,
-                message: 'Not Found',
-            }})
-            return
-        }
-        response.status(200).json(results.rows)
-    })
+    pool.query('SELECT * FROM ' + request.params.realm + ' WHERE item_id = $1 ORDER BY interval', [request.params.id])
+        .then(results => {
+            if (!results.rows.length) {
+                response.status(200).json({
+                    results: []
+                })
+                return
+            }
+            response.status(200).json({ results: results.rows})
+        })
+        .catch(error => { throw error })
 }
 
 module.exports = {
