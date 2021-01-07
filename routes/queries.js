@@ -13,7 +13,7 @@ const pool = new Pool({
  * This function describes the route to get an item name based on an item id.
  * @param {number} request ID of item
  * @param {json} response JSON containing item name corresponding to item ID
- * @throws will throw an error if request parameter invalid or response empty. 
+ * @throws will throw an error if request parameter invalid. 
  */
 const getItemName = (request, response) => {
     if (isNaN(request.params.id)) {
@@ -36,7 +36,7 @@ const getItemName = (request, response) => {
  * This function describes the route to get an item thumbnail based on an item ID.
  * @param {number} request ID of item
  * @param {json} response JSON containing item picture as a byte array
- * @throws will throw an error if request parameter invalid or response empty. 
+ * @throws will throw an error if request parameter invalid. 
  */
 const getItemPic = (request, response) => {
     if (isNaN(request.params.id)) {
@@ -59,7 +59,7 @@ const getItemPic = (request, response) => {
  * This function describes the route to get the list of items currently tracked.
  * @param {NULL} request.query.search Substring to match
  * @param {list} response List of item ids and corresponding names
- * @throws will throw an error if response empty. 
+ * @throws will throw an error if pg pool fails.
  */
 const getItemList = (request, response) => {
     let stmt = 'SELECT item_id, item_name FROM item_list'
@@ -84,7 +84,7 @@ const getItemList = (request, response) => {
  * This function gets the price history of a single item
  * @param {integer} request ID of item
  * @param {list} response List of statistical data based on item prices
- * @throws will throw an error if request parameter invalid or response empty. 
+ * @throws will throw an error if request parameter invalid. 
  */
 const getItemHistory = (request, response) => {
     if (isNaN(request.params.id)) {
