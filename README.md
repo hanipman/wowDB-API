@@ -14,6 +14,7 @@ cors
 dotenv
 express
 pg
+helmet
 ```
 
 ## Development Dependencies for testing

@@ -1,5 +1,4 @@
 const createError = require('http-errors')
-// const { promisify } = require('util')
 const Pool = require('pg').Pool
 const pool = new Pool({
     user: 'postgres',
