@@ -226,7 +226,7 @@ describe('/GET search item list', () => {
 describe('/GET item history', () => {
     it('it should return a historical list of an item of ID ordered by time', (done) => {
         chai.request(server)
-            .get('/wowdb/area_52/38')
+            .get('/wowdb/area_52/?id=38')
             .end((err, res) => {
                 res.should.have.status(200)
                 res.body.should.include.all.keys(['results'])
@@ -241,9 +241,33 @@ describe('/GET item history', () => {
             done()
             })
     })
+    it('it should return the most recent update timestamp of a specific id', (done) => {
+        chai.request(server)
+            .get('/wowdb/area_52/?id=38&last_update=true')
+            .end((err, res) => {
+                res.should.have.status(200)
+                res.body.should.include.all.keys(['results'])
+                res.body['results'].length.should.be.equal(1)
+                res.body['results'].should.be.a('array')
+                res.body['results'][0].should.include.all.keys('interval')
+            done()
+            })
+    })
+    it('it should return a the most recent update timestamp of all items', (done) => {
+        chai.request(server)
+            .get('/wowdb/area_52/?last_update=true')
+            .end((err, res) => {
+                res.should.have.status(200)
+                res.body.should.include.all.keys(['results'])
+                res.body['results'].length.should.be(1)
+                res.body['results'].should.be.a('array')
+                res.body['results'][0].should.include.all.keys('interval')
+            })
+            done()
+    })
     it('it should return a 400 error with an item ID string with non-number characters', (done) => {
         chai.request(server)
-            .get('/wowdb/area_52/a')
+            .get('/wowdb/area_52/?id=a')
             .end((err, res) => {
                 res.should.have.status(400)
                 res.body.should.have.property('error')

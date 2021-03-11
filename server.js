@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({extended: true,}))
 app.get('/item_list/name/:id', db.getItemName)
 app.get('/item_list/image/:id', db.getItemPic)
 app.get('/item_list', db.getItemList)
-app.get('/wowdb/:realm/:id', db.getItemHistory)
+app.get('/wowdb/:realm/', db.getItemHistory)
 
 app.use((req, res, next) => {
     next(error)

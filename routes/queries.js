@@ -26,7 +26,7 @@ const getItemName = (request, response) => {
                 })
                 return
             }
-            response.status(200).json({ results: results.rows})
+            response.status(200).json({ results: results.rows })
         })
         .catch(error => { throw error })
 }
@@ -49,7 +49,7 @@ const getItemPic = (request, response) => {
                 })
                 return
             }
-            response.status(200).json({ results: results.rows})
+            response.status(200).json({ results: results.rows })
         })
         .catch(error => { throw error })
 }
@@ -74,7 +74,7 @@ const getItemList = (request, response) => {
                 })
                 return
             }
-            response.status(200).json({ results: results.rows})
+            response.status(200).json({ results: results.rows })
         })
         .catch(error => { throw error })
 }
@@ -86,10 +86,14 @@ const getItemList = (request, response) => {
  * @throws will throw an error if request parameter invalid. 
  */
 const getItemHistory = (request, response) => {
-    if (isNaN(request.params.id)) {
+    if (request.query.last_update) {
+        getLastUpdateTime(request, response)
+        return
+    }
+    if (isNaN(request.query.id)) {
         throw createError(400, 'Bad Request')
     }
-    pool.query('SELECT * FROM ' + request.params.realm + ' WHERE item_id = $1 ORDER BY interval', [request.params.id])
+    pool.query('SELECT * FROM ' + request.params.realm + ' WHERE item_id = $1 ORDER BY interval', [request.query.id])
         .then(results => {
             if (!results.rows.length) {
                 response.status(200).json({
@@ -97,7 +101,36 @@ const getItemHistory = (request, response) => {
                 })
                 return
             }
-            response.status(200).json({ results: results.rows})
+            response.status(200).json({ results: results.rows })
+        })
+        .catch(error => { throw error })
+}
+
+/**
+ * This function gets the last update time of a specific item or of all
+ * items
+ * @param {integer, bool} request ID of item, time of last update
+ * @param {list} response List of last update time
+ * @throws will throw an error if request parameter invalid
+ */
+const getLastUpdateTime = (request, response) => {
+    stmt = 'SELECT interval FROM ' + request.params.realm
+    if (request.query.id) {
+        if (isNaN(request.query.id)) {
+            throw createError(400, 'Bad Request')
+        }
+        stmt += ' WHERE item_id = ' + request.query.id
+    }
+    stmt += ' ORDER BY interval DESC LIMIT 1'
+    pool.query(stmt)
+        .then(results => {
+            if (!results.rows.length) {
+                response.status(200).json({
+                    results: []
+                })
+                return
+            }
+            response.status(200).json({ results: results.rows })
         })
         .catch(error => { throw error })
 }
@@ -106,6 +139,6 @@ module.exports = {
     getItemName,
     getItemPic,
     getItemList,
-    getItemHistory
+    getItemHistory,
 }
 
