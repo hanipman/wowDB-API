@@ -9,16 +9,22 @@ const pool = new Pool({
 })
 
 /**
- * This function describes the route to get an item name based on an item id.
+ * This function describes the route to get an item name based on an item id or 
+ * a list of all ids
  * @param {number} request ID of item
- * @param {json} response JSON containing item name corresponding to item ID
+ * @param {json} response JSON containing item name corresponding to item ID or
+ * list of all ids
  * @throws will throw an error if request parameter invalid. 
  */
 const getItemName = (request, response) => {
-    if (isNaN(request.params.id)) {
-        throw createError(400, 'Bad Request')
+    stmt = 'SELECT item_name FROM item_list'
+    if (request.query.id) {
+        if (isNaN(request.query.id)) {
+            throw createError(400, 'Bad Request')
+        }
+        stmt += ' WHERE item_id = ' + request.query.id
     }
-    pool.query('SELECT item_name FROM item_list WHERE item_id = $1', [request.params.id])
+    pool.query(stmt)
         .then(results => {
             if (!results.rows.length) {
                 response.status(200).json({
@@ -32,7 +38,8 @@ const getItemName = (request, response) => {
 }
 
 /**
- * This function describes the route to get an item thumbnail based on an item ID.
+ * This function describes the route to get an item thumbnail based on an item
+ * ID.
  * @param {number} request ID of item
  * @param {json} response JSON containing item picture as a byte array
  * @throws will throw an error if request parameter invalid. 
@@ -41,7 +48,8 @@ const getItemPic = (request, response) => {
     if (isNaN(request.params.id)) {
         throw createError(400, 'Bad Request')
     }
-    pool.query('SELECT item_pic FROM item_list WHERE item_id = $1', [request.params.id])
+    pool.query('SELECT item_pic FROM item_list WHERE item_id = $1',
+    [request.params.id])
         .then(results => {
             if (!results.rows.length) {
                 response.status(200).json({
@@ -93,7 +101,8 @@ const getItemHistory = (request, response) => {
     if (isNaN(request.query.id)) {
         throw createError(400, 'Bad Request')
     }
-    pool.query('SELECT * FROM ' + request.params.realm + ' WHERE item_id = $1 ORDER BY interval', [request.query.id])
+    pool.query('SELECT * FROM ' + request.params.realm +
+    ' WHERE item_id = $1 ORDER BY interval', [request.query.id])
         .then(results => {
             if (!results.rows.length) {
                 response.status(200).json({
@@ -107,8 +116,7 @@ const getItemHistory = (request, response) => {
 }
 
 /**
- * This function gets the last update time of a specific item or of all
- * items
+ * This function gets the last update time of a specific item or of all items
  * @param {integer, bool} request ID of item, time of last update
  * @param {list} response List of last update time
  * @throws will throw an error if request parameter invalid

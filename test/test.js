@@ -110,22 +110,37 @@ const test_pic = Buffer.from(
     217])
 
 describe('/GET item name', () => {
+    it('it should GET a list of item names', (done) => {
+        chai.request(server)
+            .get('/item_list/name/')
+            .end((err, res) => {
+                res.should.have.status(200)
+                res.body.should.include.all.keys(['results'])
+                res.body['results'].length.should.be.above(0)
+                res.body['results'].should.be.a('array')
+                res.body['results'].forEach(value => {
+                    expect(value.should.include.all.keys(['item_name']))
+                })
+            done()
+        })
+    })
     it('it should GET an item name with item ID 38', (done) => {
         chai.request(server)
-            .get('/item_list/name/38')
+            .get('/item_list/name/?id=38')
             .end((err, res) => {
                 res.should.have.status(200)
                 res.body.should.include.all.keys(['results'])
                 res.body['results'].length.should.be.eql(1)
                 res.body['results'].should.be.a('array')
                 res.body['results'][0].should.have.property('item_name')
-                res.body['results'][0]['item_name'].should.be.eql("Recruit's Shirt")
+                res.body['results'][0]['item_name'].should.be.eql(
+                    "Recruit's Shirt")
             done()
         })
     })
     it('it should GET an empty array', (done) => {
         chai.request(server)
-            .get('/item_list/name/154')
+            .get('/item_list/name/?id=154')
             .end((err, res) => {
                 res.should.have.status(200)
                 res.body.should.include.all.keys(['results'])
@@ -134,9 +149,10 @@ describe('/GET item name', () => {
             done()
         })
     })
-    it('it should return a 400 error with an item ID string with non-number characters', (done) => {
+    it('it should return a 400 error with an item ID string with non-number ' + 
+    'characters', (done) => {
         chai.request(server)
-            .get('/item_list/name/a')
+            .get('/item_list/name/?id=a')
             .end((err, res) => {
                 res.should.have.status(400)
                 res.body.should.have.property('error')
@@ -158,9 +174,12 @@ describe('/GET item image', () => {
                 res.body['results'].length.should.be.eql(1)
                 res.body['results'].should.be.a('array')
                 res.body['results'][0].should.have.property('item_pic')
-                res.body['results'][0]['item_pic'].should.include.all.keys(['type', 'data'])
-                res.body['results'][0]['item_pic']['type'].should.be.equal('Buffer')
-                assert(!Buffer.compare(Buffer.from(res.body['results'][0]['item_pic']), test_pic))
+                res.body['results'][0]['item_pic'].should.include.all.keys([
+                    'type', 'data'])
+                res.body['results'][0]['item_pic']['type'].should.be.equal(
+                    'Buffer')
+                assert(!Buffer.compare(Buffer.from(res.body['results'][0][
+                    'item_pic']), test_pic))
             done()
         })
     })
@@ -175,7 +194,8 @@ describe('/GET item image', () => {
             done()
         })
     })
-    it('it should return a 400 error with an item ID string with non-number characters', (done) => {
+    it('it should return a 400 error with an item ID string with non-number' +
+        'characters', (done) => {
         chai.request(server)
             .get('/item_list/image/a')
             .end((err, res) => {
@@ -198,8 +218,10 @@ describe('/GET item list', () => {
                 res.body.should.include.all.keys(['results'])
                 res.body['results'].length.should.be.above(0)
                 res.body['results'].should.be.a('array')
-                res.body['results'][0].should.include.all.keys(['item_id', 'item_name'])
-                res.body['results'][0]['item_id'].should.be.below(res.body['results'][1]['item_id'])
+                res.body['results'][0].should.include.all.keys(['item_id',
+                    'item_name'])
+                res.body['results'][0]['item_id'].should.be.below(res.body[
+                    'results'][1]['item_id'])
             done()
             })
     })
@@ -214,7 +236,8 @@ describe('/GET search item list', () => {
                 res.body.should.include.all.keys(['results'])
                 res.body['results'].length.should.above(0)
                 res.body['results'].should.be.a('array')
-                res.body['results'][0].should.include.all.keys(['item_id', 'item_name'])
+                res.body['results'][0].should.include.all.keys(['item_id',
+                    'item_name'])
                 res.body['results'].forEach(value => {
                     expect(value['item_name'].includes('thunder'))
                 })
@@ -224,7 +247,8 @@ describe('/GET search item list', () => {
 })
 
 describe('/GET item history', () => {
-    it('it should return a historical list of an item of ID ordered by time', (done) => {
+    it('it should return a historical list of an item of ID ordered by time',
+        (done) => {
         chai.request(server)
             .get('/wowdb/area_52/?id=38')
             .end((err, res) => {
@@ -232,16 +256,18 @@ describe('/GET item history', () => {
                 res.body.should.include.all.keys(['results'])
                 res.body['results'].length.should.be.above(0)
                 res.body['results'].should.be.a('array')
-                res.body['results'][0].should.include.all.keys(['interval', 'item_id',
-                    'quantity', 'avg_unit_price', 'std_dev', 'high_price', 
-                    'low_price'])
+                res.body['results'][0].should.include.all.keys(['interval',
+                    'item_id', 'quantity', 'avg_unit_price', 'std_dev',
+                    'high_price', 'low_price'])
                 res.body['results'].forEach(value => {
-                    expect(new Date(value['interval']) < new Date(value['interval']))
+                    expect(new Date(value['interval']) < new Date(value[
+                        'interval']))
                 })
             done()
             })
     })
-    it('it should return the most recent update timestamp of a specific id', (done) => {
+    it('it should return the most recent update timestamp of a specific id',
+        (done) => {
         chai.request(server)
             .get('/wowdb/area_52/?id=38&last_update=true')
             .end((err, res) => {
@@ -253,7 +279,8 @@ describe('/GET item history', () => {
             done()
             })
     })
-    it('it should return a the most recent update timestamp of all items', (done) => {
+    it('it should return a the most recent update timestamp of all items',
+        (done) => {
         chai.request(server)
             .get('/wowdb/area_52/?last_update=true')
             .end((err, res) => {
@@ -265,7 +292,8 @@ describe('/GET item history', () => {
             })
             done()
     })
-    it('it should return a 400 error with an item ID string with non-number characters', (done) => {
+    it('it should return a 400 error with an item ID string with non-number ' + 
+    'characters', (done) => {
         chai.request(server)
             .get('/wowdb/area_52/?id=a')
             .end((err, res) => {

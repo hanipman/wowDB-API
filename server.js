@@ -12,7 +12,7 @@ app.use(cors())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true,}))
 
-app.get('/item_list/name/:id', db.getItemName)
+app.get('/item_list/name/', db.getItemName)
 app.get('/item_list/image/:id', db.getItemPic)
 app.get('/item_list', db.getItemList)
 app.get('/wowdb/:realm/', db.getItemHistory)
