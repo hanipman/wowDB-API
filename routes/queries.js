@@ -1,12 +1,18 @@
-const createError = require('http-errors')
-const Pool = require('pg').Pool
+const createError = require('http-errors');
+const pg = require('pg')
+const Pool = pg.Pool;
 const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'wowdb',
-    password: 'XXBankai00',
-    port: 5432,
-})
+	user: 'postgres',
+	host: 'localhost',
+	database: 'wowdb',
+	password: 'XXBankai00',
+	port: 5432,
+});
+
+const types = pg.types;
+types.setTypeParser(1114, function(stringValue) {
+    return new Date(stringValue + "+0000");
+});
 
 /**
  * This function describes the route to get an item name based on an item id or 
@@ -17,24 +23,24 @@ const pool = new Pool({
  * @throws will throw an error if request parameter invalid. 
  */
 const getItemName = (request, response) => {
-    stmt = 'SELECT item_name FROM item_list'
-    if (request.query.id) {
-        if (isNaN(request.query.id)) {
-            throw createError(400, 'Bad Request')
-        }
-        stmt += ' WHERE item_id = ' + request.query.id
-    }
-    pool.query(stmt)
-        .then(results => {
-            if (!results.rows.length) {
-                response.status(200).json({
-                    results: []
-                })
-                return
-            }
-            response.status(200).json({ results: results.rows })
-        })
-        .catch(error => { throw error })
+	stmt = 'SELECT item_name FROM item_list'
+	if (request.query.id) {
+		if (isNaN(request.query.id)) {
+			throw createError(400, 'Bad Request')
+		}
+		stmt += ' WHERE item_id = ' + request.query.id
+	}
+	pool.query(stmt)
+		.then(results => {
+			if (!results.rows.length) {
+				response.status(200).json({
+					results: []
+				})
+				return
+			}
+			response.status(200).json({ results: results.rows })
+		})
+		.catch(error => { throw error })
 }
 
 /**
@@ -45,21 +51,21 @@ const getItemName = (request, response) => {
  * @throws will throw an error if request parameter invalid. 
  */
 const getItemPic = (request, response) => {
-    if (isNaN(request.params.id)) {
-        throw createError(400, 'Bad Request')
-    }
-    pool.query('SELECT item_pic FROM item_list WHERE item_id = $1',
-    [request.params.id])
-        .then(results => {
-            if (!results.rows.length) {
-                response.status(200).json({
-                    results: []
-                })
-                return
-            }
-            response.status(200).json({ results: results.rows })
-        })
-        .catch(error => { throw error })
+	if (isNaN(request.params.id)) {
+		throw createError(400, 'Bad Request')
+	}
+	pool.query('SELECT item_pic FROM item_list WHERE item_id = $1',
+	[request.params.id])
+		.then(results => {
+			if (!results.rows.length) {
+				response.status(200).json({
+					results: []
+				})
+				return
+			}
+			response.status(200).json({ results: results.rows })
+		})
+		.catch(error => { throw error })
 }
 
 /**
@@ -69,22 +75,22 @@ const getItemPic = (request, response) => {
  * @throws will throw an error if pg pool fails.
  */
 const getItemList = (request, response) => {
-    let stmt = 'SELECT item_id, item_name FROM item_list'
-    if (request.query.search) {
-        stmt += " WHERE item_name ILIKE '%" + request.query.search + "%'"
-    }
-    stmt += ' ORDER BY item_id'
-    pool.query(stmt)
-        .then(results => {
-            if (!results.rows.length) {
-                response.status(200).json({
-                    results: []
-                })
-                return
-            }
-            response.status(200).json({ results: results.rows })
-        })
-        .catch(error => { throw error })
+	let stmt = 'SELECT item_id, item_name FROM item_list'
+	if (request.query.search) {
+		stmt += " WHERE item_name ILIKE '%" + request.query.search + "%'"
+	}
+	stmt += ' ORDER BY item_id'
+	pool.query(stmt)
+		.then(results => {
+			if (!results.rows.length) {
+				response.status(200).json({
+					results: []
+				})
+				return
+			}
+			response.status(200).json({ results: results.rows })
+		})
+		.catch(error => { throw error })
 }
 
 /**
@@ -94,25 +100,25 @@ const getItemList = (request, response) => {
  * @throws will throw an error if request parameter invalid. 
  */
 const getItemHistory = (request, response) => {
-    if (request.query.last_update) {
-        getLastUpdateTime(request, response)
-        return
-    }
-    if (isNaN(request.query.id)) {
-        throw createError(400, 'Bad Request')
-    }
-    pool.query('SELECT * FROM ' + request.params.realm +
-    ' WHERE item_id = $1 ORDER BY interval', [request.query.id])
-        .then(results => {
-            if (!results.rows.length) {
-                response.status(200).json({
-                    results: []
-                })
-                return
-            }
-            response.status(200).json({ results: results.rows })
-        })
-        .catch(error => { throw error })
+	if (request.query.last_update) {
+		getLastUpdateTime(request, response)
+		return
+	}
+	if (isNaN(request.query.id)) {
+		throw createError(400, 'Bad Request')
+	}
+	pool.query('SELECT * FROM ' + request.params.realm +
+	' WHERE item_id = $1 ORDER BY interval', [request.query.id])
+		.then(results => {
+			if (!results.rows.length) {
+				response.status(200).json({
+					results: []
+				})
+				return
+			}
+			response.status(200).json({ results: results.rows })
+		})
+		.catch(error => { throw error })
 }
 
 /**
@@ -122,31 +128,31 @@ const getItemHistory = (request, response) => {
  * @throws will throw an error if request parameter invalid
  */
 const getLastUpdateTime = (request, response) => {
-    stmt = 'SELECT interval FROM ' + request.params.realm
-    if (request.query.id) {
-        if (isNaN(request.query.id)) {
-            throw createError(400, 'Bad Request')
-        }
-        stmt += ' WHERE item_id = ' + request.query.id
-    }
-    stmt += ' ORDER BY interval DESC LIMIT 1'
-    pool.query(stmt)
-        .then(results => {
-            if (!results.rows.length) {
-                response.status(200).json({
-                    results: []
-                })
-                return
-            }
-            response.status(200).json({ results: results.rows })
-        })
-        .catch(error => { throw error })
+	stmt = 'SELECT interval FROM ' + request.params.realm
+	if (request.query.id) {
+		if (isNaN(request.query.id)) {
+			throw createError(400, 'Bad Request')
+		}
+		stmt += ' WHERE item_id = ' + request.query.id
+	}
+	stmt += ' ORDER BY interval DESC LIMIT 1'
+	pool.query(stmt)
+		.then(results => {
+			if (!results.rows.length) {
+				response.status(200).json({
+					results: []
+				})
+				return
+			}
+			response.status(200).json({ results: results.rows })
+		})
+		.catch(error => { throw error })
 }
 
 module.exports = {
-    getItemName,
-    getItemPic,
-    getItemList,
-    getItemHistory,
+	getItemName,
+	getItemPic,
+	getItemList,
+	getItemHistory,
 }
 
